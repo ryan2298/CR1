@@ -19,13 +19,12 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
 module reaction_timer(
     input logic clk,
     input logic clear,
     input logic start,
     input logic stop,
-    output logic [15:0] led,
+    output logic led,
     output logic [3:0] an,
     output logic [7:0] sseg
     );
@@ -33,18 +32,20 @@ module reaction_timer(
     parameter N = 20;
     logic connect;
     logic internalWire;
+    logic enable;
+    
+    assign enable = led;
     
     counter_timer #(N) uut(
         .clk(clk),
         .rst(clear),
         .up(1'b1),
-        .en(), //NEEDS TO COME FROM RAND_DELAY
-        .tick(connect), //Not sure if this is right
-        .count() //Isn't needed anywhere
+        .en(enable),
+        .totalTicks(connect),
     );
     
     BinaryToBCDConverter dut(
-        .bin(connect), //Right now, this is just 0 or 1 b/c its's tick, not a summation of ticks as count increments.
+        .bin(connect),
         .bcd(internalWire)
     );
     
@@ -54,4 +55,10 @@ module reaction_timer(
         .an(an)
     );
     
+    rand_delay wait_time(
+        .clk(clk),
+        .rst(clear),
+        .en(start),
+        .out(enable)
+    );
 endmodule

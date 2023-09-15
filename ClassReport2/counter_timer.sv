@@ -26,6 +26,7 @@ module counter_timer#(parameter N=20)(
     input logic up,
     input logic en,
     output logic tick,
+    output logic [9:0] totalTicks,
     output logic [N-1:0] count
     );
     
@@ -36,7 +37,10 @@ module counter_timer#(parameter N=20)(
     always_ff @(posedge clk, posedge rst)
     begin
     if (rst)
-        counter<=ZERO;
+        begin
+            counter<=ZERO;
+            totalTicks<=0;
+        end
     else
         counter<=n_counter;
         
@@ -44,6 +48,7 @@ module counter_timer#(parameter N=20)(
         begin
         tick <= 1;   // Output tick for 1 clock cycle (1ms)
         count <= 0;     // Reset the counter
+        totalTicks <= totalTicks + 1;
         end 
     else 
         begin
