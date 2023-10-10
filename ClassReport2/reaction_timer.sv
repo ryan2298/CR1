@@ -29,36 +29,42 @@ module reaction_timer(
     output logic [7:0] sseg
     );
     
-    parameter N = 20;
-    logic connect;
-    logic internalWire;
-    logic enable;
+    parameter N = 25;
+    logic [9:0] timing;
+    logic [1:0] state;
+    logic [11:0] BCD_output;
+    logic tic;
     
-    assign enable = led;
     
-    counter_timer #(N) uut(
+    counter_timer #(N) my_counter(
         .clk(clk),
         .rst(clear),
         .up(1'b1),
-        .en(enable),
-        .totalTicks(connect),
+        .en(1'b1),
+        .tic(tic)
     );
     
-    BinaryToBCDConverter dut(
-        .bin(connect),
-        .bcd(internalWire)
+    BinaryToBCDConverter my_BCD(
+        .bin(timing),
+        .bcd(BCD_output)
     );
     
-    sseg_decoder but(
-        .code(internalWire),
+    sseg_decoder my_decoder(
+        .tic_ms(tic),
+        .state_system(state),
+        .rst(clear),
+        .bcd(BCD_output),
         .sseg(sseg),
         .an(an)
     );
     
     rand_delay wait_time(
-        .clk(clk),
+        .tic(tic),
         .rst(clear),
+        .stp(stop),
         .en(start),
-        .out(enable)
+        .state(state),
+        .led(led),
+        .timing(timing)
     );
 endmodule

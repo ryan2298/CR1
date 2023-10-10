@@ -1,71 +1,82 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 09/14/2023 01:32:22 PM
-// Design Name: 
-// Module Name: rand_delay
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 module rand_delay(
-    input logic clk,
+    input logic tic,
     input logic rst,
+    input logic stp,
     input logic en,
-    output logic out
+    output logic led,
+    output logic [1:0] state,
+    output logic [9:0] timing
     );
     
-   logic [3:0] delayCounter;
+   logic [31:0] delayCounter;
+   
+   logic n_led;
    
    localparam [1:0] IDLE = 2'b00;
    localparam [1:0] COUNT = 2'b01;
    localparam [1:0] FINISH = 2'b10;
    
-   logic [1:0] state;
    logic [31:0] clockCounter;
 
-   always @(posedge clk or posedge rst) begin
-       if (rst) begin
+    //always @(posedge(tic), posedge(rst), posedge(en), posedge(stp))
+    always @(posedge(tic), posedge(rst)) 
+        begin
+        if (rst) 
+            begin
             state <= IDLE;
-            delayCounter <= 0;
-            out <= 0;
+            delayCounter <= 31'd99999999;
             clockCounter <= 0;
-        end else begin
-            case(state)
-                IDLE: begin
-                    if (en) begin
-                    delayCounter <= $random %14 + 2;
-                    state <= COUNT;
-                    end
+            led <= 0;
+            timing <= 0;
+            end 
+        else if(en) 
+            begin
+            if(state == IDLE)
+                begin
+                delayCounter <= ($random %14 + 2)*1000;
+                clockCounter <= 0;
+                state <= COUNT;
+                end   
+           end
+       else if (stp)
+            begin
+            if(state == COUNT)
+                begin
+                if (clockCounter < delayCounter) 
+                    timing <= 10'b1111111111;
+                state <= FINISH;
+                end 
+            end
+        else
+            begin
+            if((state == COUNT) && ((clockCounter-delayCounter) != 31'd1000))
+                begin
+                clockCounter <= clockCounter + 1;
                 end
-                COUNT: begin
-                    if (en && clockCounter >= (delayCounter * 100000000)) begin
-                        state <= FINISH;
-                    end else if (!en) begin
-                        state <= IDLE;    
-                    end
-                    else begin
-                        clockCounter <= clockCounter + 1;
-                    end
+            if ((state == COUNT) && (clockCounter > delayCounter))
+                begin
+                timing <= clockCounter - delayCounter;
+                led <= 1'b1;
                 end
-                FINISH: begin
-                    out <= 1;
-                    state <= IDLE;
-                    clockCounter <= 0;
+            if((state == COUNT) && ((clockCounter-delayCounter) == 31'd1000))
+                begin
+                state <= FINISH;
                 end
-                default: state <= IDLE;
-            endcase
-        end
+            end
     end
+        
+//    always_comb
+//        begin
+//        if((state == COUNT) && (clockCounter != 31'd1000))
+//            begin
+//            n_clockCounter <= clockCounter + 1;
+//            end
+//        if ((state == COUNT) && (clockCounter > delayCounter))
+//            begin
+//            timing <= clockCounter - delayCounter;
+//            end
+//        end
+        
+        
 endmodule
+

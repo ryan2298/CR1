@@ -21,22 +21,20 @@
 
 
 module reaction_timer_top(
-    input clk,
-    input BTNC,
-    input BTND,
-    input BTNU,
-    output led,
-    output [3:0] an,
-    output [7:0] sseg
+    input logic clk,
+    input logic [5:0] btn,
+    output logic [15:0] led,
+    output logic [7:0] an,
+    output logic [7:0] sseg
     );
     
     reaction_timer uut(
         .clk(clk),
-        .clear(BTNC),
-        .start(BTNU),
-        .stop(BTND),
-        .led(led),
-        .an(an),
+        .clear(btn[0]),
+        .start(btn[1]),
+        .stop(btn[2]),
+        .led(led[0]),
+        .an(an[7:4]),
         .sseg(sseg)
     );
 endmodule

@@ -1,149 +1,218 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 09/13/2023 07:43:19 PM
-// Design Name: 
-// Module Name: sseg_decoder
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module sseg_decoder (
-    input logic [11:0] code,     // 4-bit binary input
-    output logic [7:0] sseg,              // Seven-segment display output
+    input logic tic_ms,
+    input logic [1:0] state_system,
+    input logic rst,
+    input logic [11:0] bcd, 
+    output logic [7:0] sseg,
     output logic [3:0] an
 );
-            
-    always_comb
-        case(code[3:0])
-            4'b0000:
-                begin
-                    sseg = 8'b11000000; //0
+    
+    parameter firstPass = 0;
+    parameter secondPass = 1;
+    parameter thirdPass = 2;
+    parameter fourthPass = 3;
+    parameter IDLE = 2'b00;
+
+    logic [2:0] state, n_state;
+
+    always_ff @(posedge tic_ms, posedge rst) begin
+        if(rst)
+            state <= 0;
+        else begin
+            state = n_state;
+        end
+    end
+    
+    always_comb begin
+        if(state_system != IDLE)
+            begin
+            case(state)
+                firstPass: begin	
+                    case(bcd[3:0])
+                        4'b0000: begin
+                            sseg = 8'b11000000; //0
+                            an = 4'b1110;
+                        end
+                        4'b0001: begin
+                            sseg = 8'b11111001; //1
+                            an = 4'b1110;
+                        end
+                        4'b0010: begin
+                            sseg = 8'b10100100; //2
+                            an = 4'b1110;
+                        end
+                        4'b0011: begin
+                            sseg = 8'b10110000; //3
+                            an = 4'b1110;
+                        end
+                        4'b0100: begin
+                            sseg = 8'b10011001; //4
+                            an = 4'b1110;
+                        end
+                        4'b0101: begin
+                            sseg = 8'b10010010; //5
+                            an = 4'b1110;
+                        end
+                        4'b0110: begin
+                            sseg = 8'b10000010; //6
+                            an = 4'b1110;
+                        end
+                        4'b0111: begin
+                            sseg = 8'b11111000; //7
+                            an = 4'b1110;
+                        end
+                        4'b1000: begin
+                            sseg = 8'b10000000; //8
+                            an = 4'b1110;
+                        end
+                        4'b1001: begin
+                            sseg = 8'b10011000; //9
+                            an = 4'b1110;
+                        end
+                        4'b1111: begin
+                            sseg = 8'b10011000; //9
+                            an = 4'b1110;
+                        end
+                    endcase
+                    n_state = secondPass;
                 end
-            4'b0001:
-                begin
-                    sseg = 8'b11111001; //1
+                secondPass: begin
+                    case(bcd[7:4])
+                        4'b0000: begin
+                            sseg = 8'b11000000; //0
+                            an = 4'b1101;
+                        end
+                        4'b0001: begin
+                            sseg = 8'b11111001; //1
+                            an = 4'b1101;
+                        end
+                        4'b0010: begin
+                            sseg = 8'b10100100; //2
+                            an = 4'b1101;
+                        end
+                        4'b0011: begin
+                            sseg = 8'b10110000; //3
+                            an = 4'b1101;
+                        end
+                        4'b0100: begin
+                            sseg = 8'b10011001; //4
+                            an = 4'b1101;
+                        end
+                        4'b0101: begin
+                            sseg = 8'b10010010; //5
+                            an = 4'b1101;
+                        end
+                        4'b0110: begin
+                            sseg = 8'b10000010; //6
+                            an = 4'b1101;
+                        end
+                        4'b0111: begin
+                            sseg = 8'b11111000; //7
+                            an = 4'b1101;
+                        end
+                        4'b1000: begin
+                            sseg = 8'b10000000; //8
+                            an = 4'b1101;
+                        end
+                        4'b1001: begin
+                            sseg = 8'b10011000; //9
+                            an = 4'b1101;
+                        end
+                        4'b1111: begin
+                            sseg = 8'b10011000; //9
+                            an = 4'b1101;
+                        end
+                    endcase
+                    n_state = thirdPass;
                 end
-            4'b0010:
-                begin
-                    sseg = 8'b10100100; //2
+                thirdPass: begin
+                    case(bcd[11:8])
+                        4'b0000: begin
+                            sseg = 8'b11000000; //0
+                            an = 4'b1011;
+                        end
+                        4'b0001: begin
+                            sseg = 8'b11111001; //1
+                            an = 4'b1011;
+                        end
+                        4'b0010: begin
+                            sseg = 8'b10100100; //2
+                            an = 4'b1011;
+                        end
+                        4'b0011: begin
+                            sseg = 8'b10110000; //3
+                            an = 4'b1011;
+                        end
+                        4'b0100: begin
+                            sseg = 8'b10011001; //4
+                            an = 4'b1011;
+                        end
+                        4'b0101: begin
+                            sseg = 8'b10010010; //5
+                            an = 4'b1011;
+                        end
+                        4'b0110: begin
+                            sseg = 8'b10000010; //6
+                            an = 4'b1011;
+                        end
+                        4'b0111: begin
+                            sseg = 8'b11111000; //7
+                            an = 4'b1011;
+                        end
+                        4'b1000: begin
+                            sseg = 8'b10000000; //8
+                            an = 4'b1011;
+                        end
+                        4'b1001: begin
+                            sseg = 8'b10011000; //9
+                            an = 4'b1011;
+                        end
+                        4'b1111: begin
+                            sseg = 8'b10011000; //9
+                            an = 4'b1011;
+                        end
+                    endcase
+                    n_state = fourthPass ;
                 end
-            4'b0011:
-                begin
-                    sseg = 8'b10110000; //3
+                fourthPass: begin
+                    case(bcd[11:0])
+                        12'b111111111111: begin
+                            sseg = 8'b10011000; //9
+                            an = 4'b0111;
+                        end
+                        default: begin
+                            sseg = 8'b11000000; //0
+                            an = 4'b0111;
+                        end
+                    endcase
+                    n_state = firstPass;
                 end
-            4'b0100:
-                begin
-                     sseg = 8'b10011001; //4
+            endcase
+	    end
+	    
+	    else
+	    begin
+	    case(state)
+                firstPass: begin	
+                    n_state = secondPass;
+                    sseg = 8'b11001111; //0
+                    an = 4'b1110;
                 end
-            4'b0101:
-                begin
-                    sseg = 8'b10010010; //5
+                secondPass: begin
+                    n_state = firstPass;
+                    sseg = 8'b10001001; //0
+                    an = 4'b1101;
                 end
-            4'b0110:
-                begin
-                    sseg = 8'b10000010; //6
+                thirdPass: begin
+                    n_state = firstPass;
                 end
-            4'b0111:
-                begin
-                    sseg = 8'b11111000; //7
+                fourthPass: begin
+                    n_state = firstPass;
                 end
-            4'b1000:
-                begin
-                    sseg = 8'b100000000; //8
-                end
-            4'b1001:
-                begin
-                    sseg = 8'b10011000; //9
-                end
-            default:
-                begin
-                    sseg = 8'b00000000;
-                end
-        endcase
-        
-        always_comb
-        case(code[7:4])
-            4'b0000:
-                begin
-                    sseg = 8'b11000000; //0
-                end
-            4'b0001:
-                begin
-                    sseg = 8'b11111001; //1
-                end
-            4'b0010:
-                begin
-                    sseg = 8'b10100100; //2
-                end
-            4'b0011:
-                begin
-                    sseg = 8'b10110000; //3
-                end
-            4'b0100:
-                begin
-                     sseg = 8'b10011001; //4
-                end
-            4'b0101:
-                begin
-                    sseg = 8'b10010010; //5
-                end
-            4'b0110:
-                begin
-                    sseg = 8'b10000010; //6
-                end
-            4'b0111:
-                begin
-                    sseg = 8'b11111000; //7
-                end
-            4'b1000:
-                begin
-                    sseg = 8'b100000000; //8
-                end
-            4'b1001:
-                begin
-                    sseg = 8'b10011000; //9
-                end
-            default:
-                begin
-                    sseg = 8'b00000000;
-                end
-        endcase
-        
-        always_comb
-        case(code[9:8])
-            2'b00:
-                begin
-                    sseg = 8'b11000000; //0
-                end
-            2'b01:
-                begin
-                    sseg = 8'b11111001; //1
-                end
-            default:
-                begin
-                    sseg = 8'b0000000;
-                end
-        endcase
-            
-        if(code < 10)
-            assign an = 4'b1110;
-        else if(code < 100)
-            assign an = 4'b1100;
-        else if(code < 1000)
-            assign an = 4'b1000;
-        else
-            assign an = 4'b0000;
+            endcase
+	    end
+    end
 endmodule
 
