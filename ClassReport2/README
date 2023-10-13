@@ -1,0 +1,4 @@
+The general design methodology was that there would be a main reaction_timer module, with several smaller modules inside. Those modules would be rand_delay, counter_timer, bin2BCD, and decode.
+Rand_delay would generate the random interval the user would have to wait, and that output was tied to the enable of counter_timer. As a result, counter_timer couldn't start counting until
+the enable was high. This allowed us to also check for early button presses because if the button was pressed before enable was high, that meant it was early. Counter_timer would start counting and output
+the elapsed time to bin2BCD which would convert the elapsed time to BCD to make displaying the time easier. And then, lastly, the BCD was decoded into an and sseg values for display.
