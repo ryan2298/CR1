@@ -1,1 +1,3 @@
-
+The process for this class report was fairly straight-forward. In Vivado, I created an I2C slot and instantiated it in the top_level. In Xilinix, I used Chu's I2C function to read temperature data from the sensor.
+I then multiplied that number by 100 to remove the decimal point. I loaded each digit of this number into an array, and used Chu's sseg function to push each digit to the sseg display, so all together, it shows the current
+temperature sensor value.
